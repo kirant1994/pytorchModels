@@ -63,7 +63,7 @@ class Transformer(torch.nn.Module):
                                                         self_bias=decoder_bias,
                                                         memory_bias=encoder_bias
                                                       )
-    x = self.fc_output(x)
+    x = self.fc_output(x_dec)
     x = torch.nn.functional.log_softmax(x, dim=-1)
     return x, (enc_att_list, dec_self_att_list, dec_cross_att_list)
 
@@ -81,6 +81,7 @@ class Transformer(torch.nn.Module):
     N, T = y.shape
     decoder_bias = prepare_additive_lower_triangular_mask(T, N)
     y = self.target_embedding(y)
+    y = y * (self.hidden_dim ** 0.5)
 
     # Shifting to the right and adding a zero vector for SOS
     y = torch.nn.functional.pad(y, (0, 0, 1, 0))[:, :-1]
